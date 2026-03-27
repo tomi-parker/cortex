@@ -150,7 +150,7 @@ cortex/
 | **Frame** | Printed from `CAO/chassis.stl` | PLA, 0.2 mm layers |
 | **Skids** | Printed from `CAO/patin.stl` | PLA, 0.2 mm layers |
 
-> **Note (lidar baud rates) :** The X4 uses a non-standard 128 000 bps rate incompatible with Arduino Uno. The X2 runs at standard 115 200 bps but generates continuous data — increase the Arduino Due serial buffer to 512 bytes (`RingBuffer.h`).
+> **Note (lidar baud rates) :** The X4 uses a non-standard 128 000 bps rate incompatible with Arduino Uno. The X2 runs at standard 115 200 bps but generates continuous data — increase the Arduino Due serial buffer to 512 bytes: edit `%LOCALAPPDATA%\Arduino15\packages\arduino\hardware\sam\1.6.12\cores\arduino\RingBuffer.h` and change `#define SERIAL_BUFFER_SIZE` from 64 to 512 (see [docs/HARDWARE.md](docs/HARDWARE.md) for full path details).
 
 ---
 
@@ -164,10 +164,16 @@ cortex/
  └──────────────────┬───────────────────────────────────────────┘
                     │  5 inputs
  ┌──────────────────▼───────────────────────────────────────────┐
- │                   HIDDEN LAYER (5 neurons)                   │
+ │            HIDDEN LAYER 1 (8 neurons, simulation)            │
+ │         or HIDDEN LAYER   (5 neurons, firmware)              │
  │  Weighted sum + sigmoid activation                           │
  └──────────────────┬───────────────────────────────────────────┘
-                    │  5 activations
+                    │
+ ┌──────────────────▼───────────────────────────────────────────┐
+ │            HIDDEN LAYER 2 (8 neurons, simulation only)       │
+ │  Weighted sum + sigmoid activation                           │
+ └──────────────────┬───────────────────────────────────────────┘
+                    │
  ┌──────────────────▼───────────────────────────────────────────┐
  │                   OUTPUT LAYER (2 neurons)                   │
  │  output[0] → steering  (0=full left, 0.5=straight, 1=right)  │
@@ -185,6 +191,8 @@ The three learning modes all converge to the same goal — a network that maps s
 - **Genetic Algorithm**: fitness = total distance driven without collision; genes = all synaptic weights.
 - **Supervised Learning**: a scripted teacher generates labelled examples; student trained by linear regression on sensor→action pairs.
 - **Backpropagation**: a heuristic generates target actions each frame; network trained online with gradient descent.
+
+> **Architecture note:** The browser simulation uses a `[5, 8, 8, 2]` network (deeper, for richer training). The firmware uses a `[5, 5, 2]` network (shallower, to fit microcontroller memory). Use `tools/model_converter.js` to bridge the gap — see [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 
 ---
 

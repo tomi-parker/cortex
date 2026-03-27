@@ -51,26 +51,53 @@ Neurons in adjacent layers are **fully connected**: every neuron in layer *l* ha
 
 ## The Cortex Network Architecture
 
-The primary Cortex architecture is a **5-5-2 feed-forward network**:
+There are two architectures in use depending on context:
+
+### Simulation architecture — 5-8-8-2 (browser)
+
+The browser simulation (`Simulation.js`) uses a deeper network with two hidden layers:
 
 ```
-Input Layer       Hidden Layer      Output Layer
- (5 neurons)       (5 neurons)       (2 neurons)
-  ┌───┐            ┌───┐            ┌───┐
-  │d₀ │──────┬────►│h₀ │──────┬────►│y₀ │ → steering
-  │d₁ │──────┤    ►│h₁ │──────┤    ►│y₁ │ → throttle
-  │d₂ │──────┤    ►│h₂ │──────┤    └───┘
-  │d₃ │──────┤    ►│h₃ │──────┤
-  │d₄ │──────┘    ►│h₄ │──────┘
-  └───┘            └───┘
+Input (5)    Hidden 1 (8)   Hidden 2 (8)   Output (2)
+  ┌───┐        ┌───┐          ┌───┐          ┌───┐
+  │d₀ │───────►│h₀ │─────────►│g₀ │─────────►│y₀ │ → steering
+  │d₁ │───────►│h₁ │─────────►│g₁ │─────────►│y₁ │ → throttle
+  │d₂ │───────►│h₂ │─────────►│g₂ │─────────►└───┘
+  │d₃ │───────►│h₃ │─────────►│g₃ │
+  │d₄ │───────►│h₄ │─────────►│g₄ │
+  └───┘        │h₅ │─────────►│g₅ │
+               │h₆ │─────────►│g₆ │
+               │h₇ │─────────►│g₇ │
+               └───┘          └───┘
 ```
 
-**Parameter count:**
-- Input → Hidden weight matrix: 5 × 5 = 25 weights
-- Hidden biases: 5
-- Hidden → Output weight matrix: 5 × 2 = 10 weights
-- Output biases: 2
+**Parameter count (simulation):**
+- Input → Hidden 1: 5 × 8 = 40 weights + 8 biases
+- Hidden 1 → Hidden 2: 8 × 8 = 64 weights + 8 biases
+- Hidden 2 → Output: 8 × 2 = 16 weights + 2 biases
+- **Total: 138 trainable parameters**
+
+### Firmware architecture — 5-5-2 (ESP32 / Arduino Due)
+
+The embedded firmware (`NeuralNet.h`, `Config.h`) uses a shallower 3-layer network to fit within microcontroller memory constraints:
+
+```
+Input (5)    Hidden (5)    Output (2)
+  ┌───┐        ┌───┐        ┌───┐
+  │d₀ │───────►│h₀ │───────►│y₀ │ → steering
+  │d₁ │───────►│h₁ │───────►│y₁ │ → throttle
+  │d₂ │───────►│h₂ │───────►└───┘
+  │d₃ │───────►│h₃ │
+  │d₄ │───────►│h₄ │
+  └───┘        └───┘
+```
+
+**Parameter count (firmware):**
+- Input → Hidden: 5 × 5 = 25 weights + 5 biases
+- Hidden → Output: 5 × 2 = 10 weights + 2 biases
 - **Total: 42 trainable parameters**
+
+> **Note on deployment:** The `model_converter.js` tool reads the JSON exported by the simulation and extracts the first two weight layers to populate the firmware's fixed-size arrays. If you train a `[5, 8, 8, 2]` model in the simulation and deploy it, only the first hidden layer weights are transferred — retrain the simulation using the `[5, 5, 2]` architecture (or modify `Config.h` and `NeuralNet.h` to match `[5, 8, 8, 2]`) for best results on hardware.
 
 **Inputs (indices 0–4):**
 
@@ -155,14 +182,17 @@ Where:
 - `z^(l)` — pre-activation values
 - `a^(l)` — post-activation values (output of this layer)
 
-For the full 5-5-2 network:
+For the simulation's 5-8-8-2 network:
 
 ```
-z¹ = W¹ · x + b¹        (5×5 · 5×1 → 5×1)
-a¹ = sigmoid(z¹)        (5×1)
+z¹ = W¹ · x  + b¹       (8×5  · 5×1 → 8×1)
+a¹ = sigmoid(z¹)        (8×1)
 
-z² = W² · a¹ + b²       (2×5 · 5×1 → 2×1)
-a² = sigmoid(z²)        (2×1)  ← final output [steer, throttle]
+z² = W² · a¹ + b²       (8×8  · 8×1 → 8×1)
+a² = sigmoid(z²)        (8×1)
+
+z³ = W³ · a² + b³       (2×8  · 8×1 → 2×1)
+a³ = sigmoid(z³)        (2×1)  ← final output [steer, throttle]
 ```
 
 ---

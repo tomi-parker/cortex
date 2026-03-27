@@ -228,11 +228,12 @@ Feed-forward neural network with backpropagation. Depends on `Matrix`.
 
 **Example:**
 ```js
-const nn = new NeuralNetwork([5, 5, 2], {
+const nn = new NeuralNetwork([5, 8, 8, 2], {  // simulation architecture
   learningRate: 0.05,
   activation: 'sigmoid',
   l2Lambda: 0.0001,
 });
+// Firmware uses [5, 5, 2] — see docs/NEURAL_NETWORK.md for details
 ```
 
 ---
