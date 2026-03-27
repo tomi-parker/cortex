@@ -138,36 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (trackRandBtn) {
     trackRandBtn.addEventListener('click', () => {
       if (!simulation) return;
-      const wasRunning = simulation.running;
-      simulation.pause();
-
-      // Switch the track generation method then re-init
-      const origInit = simulation.track
-        ? simulation.track.generateCircuit.bind(simulation.track)
-        : null;
-
-      // Swap generator used in simulation.init()
-      simulation._useRandomTrack = !simulation._useRandomTrack;
-      trackRandBtn.textContent   = simulation._useRandomTrack ? '⬡ Circuit' : '⬡ Random';
-
-      const oldInit = simulation.init.bind(simulation);
-      simulation.init = function () {
-        this.track   = new Track(this.canvas, this.ctx);
-        this.startPos = this._useRandomTrack
-          ? this.track.generateRandom()
-          : this.track.generateCircuit();
-        this.walls = this.track.getWalls();
-        switch (this.mode) {
-          case 'genetic':    this._initGenetic();    break;
-          case 'supervised': this._initSupervised(); break;
-          case 'backprop':   this._initBackprop();   break;
-        }
-      };
-
-      simulation.reset();
-      simulation.init = oldInit; // restore original
-
-      if (wasRunning) simulation.start();
+      const isRandom = simulation._trackMode === 'random';
+      trackRandBtn.textContent = isRandom ? '⬡  Random Track' : '⬡  Circuit';
+      // setTrackMode pauses, rebuilds track, and resets agents internally
+      simulation.setTrackMode(isRandom ? 'circuit' : 'random');
       syncPlayButton();
     });
   }

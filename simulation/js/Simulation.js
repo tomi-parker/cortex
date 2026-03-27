@@ -69,6 +69,8 @@ class Simulation {
     // Options forwarded to agents
     this._learningRate = options.learningRate ?? 0.05;
     this._mutationRate = options.mutationRate ?? 0.15;
+    /** 'circuit' | 'random' — controls which track generator init() uses. */
+    this._trackMode    = options.trackMode    ?? 'circuit';
   }
 
   // ---------------------------------------------------------------------------
@@ -78,7 +80,9 @@ class Simulation {
   /** Builds the track and initialises agents for the current mode. */
   init() {
     this.track    = new Track(this.canvas, this.ctx);
-    this.startPos = this.track.generateCircuit();
+    this.startPos = this._trackMode === 'random'
+      ? this.track.generateRandom()
+      : this.track.generateCircuit();
     this.walls    = this.track.getWalls();
 
     switch (this.mode) {
@@ -453,7 +457,7 @@ class Simulation {
       ctx.fillText(`Alive: ${stats.alive}/${stats.totalVehicles}`, 110, 26);
       ctx.fillText(`Mean: ${Math.round(stats.meanFitness)}`, 110, 42);
     } else {
-      const label = this.mode === 'supervised' ? 'Err' : 'Err';
+      const label = this.mode === 'supervised' ? 'Err' : 'MSE';
       ctx.fillText(`${label}: ${(stats.error || 0).toFixed(4)}`, 110, 26);
     }
     ctx.restore();
@@ -539,6 +543,16 @@ class Simulation {
     } catch (e) {
       console.error('[Simulation] importModel failed:', e);
     }
+  }
+
+  /**
+   * Switches the track generator used on the next init() / reset().
+   * Calls reset() immediately to rebuild the track.
+   * @param {'circuit'|'random'} mode
+   */
+  setTrackMode(trackMode) {
+    this._trackMode = trackMode;
+    this.reset();
   }
 
   /**

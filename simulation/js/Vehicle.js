@@ -209,8 +209,6 @@ class Vehicle {
     }
 
     // --- Vehicle body ---
-    const ca = Math.cos(this.angle);
-    const sa = Math.sin(this.angle);
     const hw = this.halfW;
     const hh = this.halfH;
 
@@ -233,9 +231,6 @@ class Vehicle {
     ctx.fillRect(hw - 3, -hh + 1, 3, hh * 2 - 2);
 
     ctx.restore();
-
-    // Suppress unused-variable lint for ca, sa (used if we ever switch to manual transform)
-    void ca; void sa;
   }
 
   // ---------------------------------------------------------------------------
