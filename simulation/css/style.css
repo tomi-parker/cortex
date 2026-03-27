@@ -1,0 +1,431 @@
+/* ============================================================
+   Cortex AI Platform — Dark Theme Stylesheet
+   Colour palette:
+     Background   #1a1a2e
+     Panel        #16213e
+     Accent       #0f3460
+     Highlight    #e94560
+     Blue         #4488ff
+     Text         #c8d6e5
+     Text-dim     #7f8fa6
+     Border       #1e3a5f
+   ============================================================ */
+
+/* ── Reset & globals ───────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:         #1a1a2e;
+  --panel:      #16213e;
+  --accent:     #0f3460;
+  --highlight:  #e94560;
+  --blue:       #4488ff;
+  --text:       #c8d6e5;
+  --text-dim:   #7f8fa6;
+  --border:     #1e3a5f;
+  --success:    #00b894;
+  --font-mono:  'Courier New', Courier, monospace;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ── App header ────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: var(--panel);
+  border-bottom: 2px solid var(--highlight);
+  padding: 8px 18px;
+  height: 46px;
+  flex-shrink: 0;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-logo {
+  font-size: 1.4rem;
+  color: var(--highlight);
+  line-height: 1;
+}
+
+.app-header h1 {
+  font-size: 1.1rem;
+  letter-spacing: 4px;
+  color: var(--highlight);
+  white-space: nowrap;
+}
+
+.header-subtitle {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  letter-spacing: 1px;
+}
+
+.header-hints {
+  margin-left: auto;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+kbd {
+  background: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text);
+}
+
+/* ── Three-column layout ───────────────────────────────────── */
+.app-layout {
+  display: flex;
+  height: calc(100vh - 46px);
+  overflow: hidden;
+}
+
+/* ── Panels ────────────────────────────────────────────────── */
+.panel {
+  width: 268px;
+  min-width: 268px;
+  background: var(--panel);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 12px;
+  flex-shrink: 0;
+}
+
+.left-panel  { border-right: 1px solid var(--border); }
+.right-panel { border-left:  1px solid var(--border); }
+
+/* Scrollbar */
+.panel::-webkit-scrollbar        { width: 4px; }
+.panel::-webkit-scrollbar-track  { background: var(--bg); }
+.panel::-webkit-scrollbar-thumb  { background: var(--accent); border-radius: 2px; }
+
+/* ── Section ───────────────────────────────────────────────── */
+.section {
+  margin-bottom: 18px;
+}
+
+.section-title {
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--blue);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+/* ── Mode tabs ─────────────────────────────────────────────── */
+.mode-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.mode-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: var(--accent);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 7px 4px 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+
+.mode-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.mode-btn:hover {
+  background: #1a4080;
+  color: var(--text);
+  border-color: var(--blue);
+}
+
+.mode-btn.active {
+  background: var(--highlight);
+  color: #fff;
+  border-color: var(--highlight);
+}
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  transition: background 0.18s, border-color 0.18s, transform 0.1s;
+  text-align: center;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--highlight);
+  color: #fff;
+  border-color: var(--highlight);
+}
+.btn-primary:hover { background: #ff6070; border-color: #ff6070; }
+
+.btn-secondary {
+  background: var(--accent);
+  color: var(--text);
+  border-color: var(--border);
+}
+.btn-secondary:hover { background: #174a80; border-color: var(--blue); }
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+}
+.btn-row .btn { flex: 1; }
+
+/* ── Speed buttons ─────────────────────────────────────────── */
+.speed-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.speed-label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-right: 2px;
+  white-space: nowrap;
+}
+
+.speed-btn {
+  background: var(--accent);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 5px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.18s, color 0.18s;
+  flex: 1;
+}
+.speed-btn:hover  { background: #174a80; color: var(--text); border-color: var(--blue); }
+.speed-btn.active { background: var(--highlight); color: #fff; border-color: var(--highlight); }
+
+/* ── Sliders ───────────────────────────────────────────────── */
+.slider-label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin-bottom: 5px;
+}
+
+.slider-readout {
+  color: var(--highlight);
+  font-weight: bold;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--highlight);
+  cursor: pointer;
+}
+
+.hint-text {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+/* ── Stats grid ────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.stat-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 3px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.15rem;
+  color: var(--highlight);
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* ── Import button (styled like .btn-secondary) ────────────── */
+.import-label {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  cursor: pointer;
+}
+
+.import-label input[type="file"] {
+  display: none;
+}
+
+/* ── Centre panel & canvas ─────────────────────────────────── */
+.center-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0d0d1a;
+  overflow: hidden;
+  min-width: 0;
+}
+
+#simulationCanvas {
+  display: block;
+  border: 2px solid var(--border);
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 1px rgba(68, 136, 255, 0.08),
+    0 0 40px rgba(233, 69, 96, 0.18),
+    0 0 80px rgba(68, 136, 255, 0.08);
+  max-width:  100%;
+  max-height: 100%;
+}
+
+/* ── Right-panel canvases ──────────────────────────────────── */
+#networkCanvas,
+#chartCanvas {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: #0d1117;
+}
+
+/* ── Chart legend ──────────────────────────────────────────── */
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.legend-line {
+  display: inline-block;
+  width: 20px;
+  height: 2px;
+  border-radius: 1px;
+  vertical-align: middle;
+}
+.legend-line.red  { background: var(--highlight); }
+.legend-line.blue { background: var(--blue); }
+
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+.legend-dot.red  { background: var(--highlight); }
+.legend-dot.blue { background: var(--blue); }
+
+/* ── Architecture info box ─────────────────────────────────── */
+.arch-info {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  line-height: 1.8;
+  white-space: pre;
+}
+
+/* ── Responsive — stack vertically on narrow viewports ─────── */
+@media (max-width: 1100px) {
+  html, body { overflow: auto; }
+
+  .app-layout {
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+
+  .panel {
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
+  }
+
+  .left-panel  { border-right: none; border-bottom: 1px solid var(--border); }
+  .right-panel { border-left:  none; border-top:    1px solid var(--border); }
+
+  .center-panel {
+    order: -1;
+    width: 100%;
+    padding: 10px;
+  }
+
+  #simulationCanvas {
+    width: 100%;
+    height: auto;
+  }
+
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .stats-grid    { grid-template-columns: 1fr 1fr; }
+  .mode-tabs     { flex-direction: column; }
+  .app-header h1 { font-size: 0.9rem; }
+}

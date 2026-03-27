@@ -1,124 +1,231 @@
 
-<br/>
 <p align="center">
-   <a href="https://github.com/GSDevelop-04/Cortex">
-    <img src="Images/image.png" alt="Logo" width="320" height="180">
-   </a>
-   <br/>
-   Plateforme de découverte et d'étude de L'Intelligence Artificielle<br/>
-   Véhicule autonome 
+  <img src="Images/image.png" alt="Cortex AI Logo" width="320">
+  <br/>
+  <strong>Cortex — Plateforme IA pour Véhicule Autonome</strong><br/>
+  <em>Autonomous Vehicle AI Platform</em>
 </p>
 
-
-##    1) Introduction
-
-Cortex est un véhicule d'étude de l'Intelligence Artificielle avec réseaux de neurones.
-cliquer pour voir la vidéo sur youtube:
-[![Vidéo](https://github.com/GSDevelop-04/Cortex/blob/main/Images/presentation.jpg)](https://youtu.be/U6bnyhtQa3g)
-
-Cette plateforme permet de découvrir les alghorithmes génétiques ainsi que l'apprentissage supervisé.
-
-**Nouveau:  Version 0.2 utilisation d'un piste générée aléatoirement ou un circuit routier**
- 
 <p align="center">
- <a href="https://github.com/GSDevelop-04/RaceMini">
-    <img src="Images/GeneticCortex.png" alt="véhicules" width="640" height="373">
-    <img src="Images/LearningNouv.png" alt="véhicules" width="640" height="373">
- </a>
+  <a href="LICENSE.txt">
+    <img src="https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg" alt="License: CC BY-NC-SA">
+  </a>
+  <img src="https://img.shields.io/badge/JavaScript-ES6%2B-yellow?logo=javascript" alt="JavaScript">
+  <img src="https://img.shields.io/badge/Arduino-ESP32%20%7C%20Due-teal?logo=arduino" alt="Arduino/ESP32">
 </p>
 
-Il comprend des 3 programmes, en javascript, de simulation permettant l'entrainement d'un reseau de neurones ainsi qu'un petit véhicule réel d'experimentation.
-Le véhicule perçoit son environement grâce à un lidar "YDlidar X4". L'utilisation d'un "X2" est en cours de developpement.
+---
 
-Nb: le lidar X4 a une vitesse de transmission série de 128 000 bps, non standard, elle le rend incompatible avec une carte Uno (cf. diviseur de fréquence) le "X2" a une vitesse de 115 200 bps mais le flux continu des données risque de saturer un µp à 8 Mhz. La taille du tampon de données doit, d'ailleurs, être augmentée sur une Due: C:\Users\xxxxxxx\AppData\Local\Arduino15\packages\arduino\hardware\sam\1.6.12\cores\arduino\RingBuffer.h #define SERIAL_BUFFER_SIZE 64 par defaut 512 pour éviter les erreurs.
+## 🇫🇷 Description
 
+**Cortex** est une plateforme éducative complète pour découvrir l'Intelligence Artificielle appliquée aux véhicules autonomes. Elle comprend :
 
-<p align="center">
- <a href="https://github.com/GSDevelop-04/RaceMini">
-    <img src="Images/modele.jpg" alt="véhicules" width="640" height="373">
- </a>
-</p>
+- Une **simulation JavaScript** exécutable directement dans le navigateur — aucune installation requise.
+- Trois **modes d'apprentissage** : algorithme génétique, apprentissage supervisé et rétropropagation du gradient.
+- Un **véhicule physique** imprimable en 3D, équipé d'un lidar YDlidar, piloté par un ESP32 ou une Arduino Due.
+- Un **pipeline complet** : entraîner le réseau dans la simulation, exporter les poids, et les déployer sur le matériel réel.
 
-La version la plus simple comprend 5 neurones: 3 de présentation et 2 de sortie.
+## 🇬🇧 Description
 
-Il existe aussi une version à 12 neurones: 5 de présentation, 5 d'une couche intermédiaire et 2 de sortie.
- 
-La couche de présentation contient les 5 distances du véhicule au bord de la route dans 5 directions (-90° -45° 0° 45° 90°)
+**Cortex** is a complete educational platform for exploring Artificial Intelligence applied to autonomous vehicles. It includes:
 
-**GeneticCortex5:** Version pour découvrir les algorithmes génétiques avec 5 neurones ( seules les distance à -45° 0° et 45° sont utilisées ) et seulement 3 poids synaptiques (dont 1 biais).  Les gènes sont directement les poids synaptiques. La premiere génération utilise des poids générés aléatoirement.<br/>
-Seul le véhicule de tête voiture peut se reproduire, A chaque nouvelle génération les poids prennent une valeur entre ceux du parent et une valeur aléatoire en fonction d'un taux de mutation ( taux de 0: tous les enfants ont les mêmes caractéristiques que le parent, taux de 1: chaque génération ne depend pas du parent )<br/>
-Avec seulement trois gènes l'évolution est très rapide.
-
-**Attention**, il est important de comprendre que vue la structure utilisée (pas de vision globale de la route, pas de neurone recursif) il est illusoire d'obtenir de l'anticipation avant le virage (déport à droite pour tourner à gauche, passage à la corde puis élargissement de la trajectoire etc.) imaginez vous conduire avec seulement comme indication la distance du bord de route à 45° droite, en face et à 45° gauche !
-
-**LearningCortex5:** Version pour découvrir l'apprentissage supervisé, on retrouve la configuration neuronale de la version génétique.<br/>
-Il est necessaire de definir la trajectoire à suivre à la souris: On peut modifier les points de passages, les tangeantes et aussi la vitesse. Entre les points de passage la vitesse varie linéairement.<br/>
-Le véhicule professeur suit la trajectoire, il est possible de récupérer les différents echantillons de l'apprentissage dans un fichier csv qui comprend les trois informations de distance et les valeurs cibles du professeur (direction et vitesse).<br/>
-Les calculs des coefficients peuvent être alors fait par regression lineaire dans un tableur: il faut trier les valeurs non significatives (quand d4-d2<100) puis calculer les valeurs par régression lineaire (attention pour la direction la droite doit passer par zero et l'option régression linéaire ne le fait pas, il faut donc entrer les formules).<br/>
-Le calcul peut aussi être automatique (on utilise, dans le programme javaScript, pour la direction la moyenne entre la regression horizontale et verticale, on pourrait aussi utiliser une régression orthogonale mais le calcul est un peu plus complexe sans apporter d'avantage significatif )
-
-**LearnigCortex12:** Version à 12 neurones et 42 poids synaptiques (avec les biais), elle est destinée à la découverte de l'apprentissage supervisé avec rétropropagation du gradient d'erreur. La fonction d'activation est une sigmoïde (une version avec fonction ReLu est à l'étude).<br/>
-Une premiere version ne comprend que la direction (11 neurones: 1 seul neurone de sortie et 36 poids synaptiques) et permet d'appréhender les calculs de rétropropagation du gradient d'erreur sur la couche de sortie et la couche cachée.<br/>
-La version 12 neurones est en cours de developpement.
-
-**Maquette:** Le modèle est entierement imprimable en 3D. Si vous utilisez une Arduino Due il faut couper les fixations de ESP 32 après l'impression. Les coefficients obtenus sur les simulations sont à copier dans le programme Arduino.
-
-**Dans le dépot Cortex vous trouverez :**
-
-* les fichiers CAO, STL pour imprimantes 3D
-* Les sources Html et javascript pour l'entrainement
-* Le source ESP32 (en cours) ou Arduino Due pour IDE Arduino
-
-
-L'ensemble est sous licence **CC BY-NC-SA**
-
-**Les éléments suivants sont nécessaires:**
-
-* YDlidar X4 (essai en cours pour passer à un X2, moins cher)
-* Arduino Due ou ESP32 ( Il existe de nombreux modules, les fixations sont prévues pour un ESP32 DEVKIT V1: 30 broches)
-* Carte double variateur type TB6612 ou DRV8833 ou shield moteur pour Arduino Due
-* Module d'alimentation découpage type lm2596
-* 2 x Moteurs reductés, roues
-* Support de batterie
-* Visserie
-
-
-##    2) Câblage
-
-Le câblage peut être réalisé en fils volants ou avec un circuit imprimé (document KiCad)
+- A **JavaScript simulation** that runs directly in any browser — no installation needed.
+- Three **learning modes**: genetic algorithm, supervised learning, and backpropagation.
+- A **3D-printable physical vehicle** equipped with a YDlidar scanner, driven by an ESP32 or Arduino Due.
+- A **full pipeline**: train the network in simulation, export the weights, and deploy them to real hardware.
 
 <p align="center">
- <a href="https://github.com/GSDevelop-04/Cortex">
-    <img src="Images/schema.png" alt="véhicules" width="476" height="562">
- </a>
+  <img src="Images/GeneticCortex.png" alt="Genetic Algorithm mode" width="640">
+  <br/><em>Genetic Algorithm mode — 20 vehicles evolving simultaneously</em>
 </p>
 
-**Liasons Arduino Due ou ESP32 Lidar:**  
-* Série: Due RX1 / ESP32 RX2           <-> Tx Lidar X4 Tx X2
-* Série: Due TX1 / ESP32 TX2           <-> Rx Lidar X4 Nc X2
-* Vitesse Moteur Due D7 / ESP32 GPIO 27<-> M_SCTR Lidar X4 M_SCTR X2
-* Enable Due D3 / ESP32 GPIO 23        <-> M_EN Lidar X4 Nc X2
+---
 
-**Liaisons Arduino Due ou ESP32 Variateur:**  
-* Due D5 /  ESP32 GPIO 19 <-> APWM  // AIN2 DRV8833
-* Due D4 /  ESP32 GPIO 22 <-> AIN1  // Marche avant: 0 Marche arrière: 1
+## Table of Contents
 
-* Due D9 /  ESP32 GPIO 21 <-> BPWM  // BIN2 DRV8833 
-* Due D12 / ESP32 GPIO 18 <-> BIN1  // Marche avant: 0 Marche arrière: 1
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Hardware Requirements](#hardware-requirements)
+- [How It Works](#how-it-works)
+- [Documentation](#documentation)
+- [License](#license)
+- [Credits](#credits)
 
-* +3.3 V                  <-> Vcc selon carte
-* Vbat                    <-> VM				
+---
 
-**Et les alimentations 5 V:** Le 5v est fourni par un mini-module regulateur 5V à découpage (le lidar consomme trop pour le regulateur Arduino) 
+## Features
 
+| Mode | Description (FR) | Description (EN) |
+|------|-----------------|-----------------|
+| 🧬 **Genetic Algorithm** | 20 véhicules évoluent simultanément par sélection naturelle. Les poids synaptiques sont les gènes. | 20 vehicles evolve simultaneously via natural selection. Synaptic weights are the genes. |
+| 🎓 **Supervised Learning** | Un véhicule "professeur" suit une trajectoire définie. L'élève apprend par régression linéaire. | A "teacher" vehicle follows a drawn path. The student learns via linear regression. |
+| 📉 **Backpropagation** | Un réseau à 12 neurones apprend par rétropropagation du gradient d'erreur avec sigmoïde. | A 12-neuron network learns via gradient error backpropagation with sigmoid activation. |
+| 🚗 **Physical Hardware** | Déploiement sur ESP32/Arduino Due avec lidar YDlidar X4 ou X2. | Deployment to ESP32/Arduino Due with YDlidar X4 or X2 scanner. |
+| 📦 **Model Export** | Exportez les poids entraînés en JSON et convertissez-les en firmware C++. | Export trained weights as JSON and convert them to C++ firmware. |
 
-##   3) Vidéos
+---
 
-à faire
-* [Présentation: https://youtu.be/U6bnyhtQa3g](https://youtu.be/U6bnyhtQa3g)
-* [Algorithme génétique: https://youtu.be/](https://)
-* [Apprentissage supervisé: https://youtu.be/](https://youtu.be/)
-* [Modélisation caméra sténopé: https://youtu.be/](https://youtu.be/)
+## Quick Start
+
+### Simulation (navigateur / browser)
+
+```bash
+# Aucune installation requise / No installation required
+# Ouvrir dans le navigateur / Open in browser:
+simulation/index.html
+```
+
+Double-click `simulation/index.html` or serve with any static HTTP server:
+
+```bash
+# With Python:
+python -m http.server 8080
+# Then open: http://localhost:8080/simulation/
+```
+
+### Model Converter (Node.js requis / required)
+
+```bash
+node tools/model_converter.js models/my-trained-model.json output_weights.h
+```
+
+---
+
+## Project Structure
+
+```
+cortex/
+├── simulation/              # Browser simulation (open index.html)
+│   ├── index.html
+│   ├── css/style.css
+│   └── js/
+│       ├── main.js          # Entry point
+│       ├── Simulation.js    # 3 learning modes orchestration
+│       ├── Vehicle.js       # Autonomous agent + 5 lidar sensors
+│       ├── Track.js         # Catmull-Rom spline track generator
+│       └── Dashboard.js     # Real-time stats & network visualiser
+├── src/
+│   └── neural_network/      # Reusable AI library
+│       ├── Matrix.js        # Matrix maths (no dependencies)
+│       ├── NeuralNetwork.js # Feed-forward NN + backpropagation
+│       └── GeneticAlgorithm.js  # GA: selection, crossover, mutation
+├── firmware/
+│   └── cortex_vehicle/      # Arduino/ESP32 firmware
+│       ├── cortex_vehicle.ino
+│       ├── Config.h         # Board & pin configuration
+│       ├── NeuralNet.h      # Embedded inference engine
+│       ├── Lidar.h          # YDlidar X4/X2 driver
+│       └── Motor.h          # Motor driver abstraction
+├── tools/
+│   └── model_converter.js   # JSON model → C++ header
+├── models/                  # Saved trained models (JSON)
+├── CAO/                     # 3D printable files
+│   ├── chassis.stl
+│   └── patin.stl
+├── Images/                  # Wiring diagrams and screenshots
+├── JavaScript/              # Original simulation sources (preserved)
+├── Arduino/                 # Original firmware sources (preserved)
+└── docs/                    # Detailed documentation
+    ├── GETTING_STARTED.md
+    ├── HARDWARE.md
+    ├── NEURAL_NETWORK.md
+    └── API.md
+```
+
+---
+
+## Hardware Requirements
+
+| Component | Model | Notes |
+|-----------|-------|-------|
+| **Microcontroller** | ESP32 DEVKIT V1 (30 pins) | Recommended; footprint matches 3D chassis |
+| **Microcontroller (alt)** | Arduino Due | Also supported; trim ESP32 mounts after printing |
+| **Lidar scanner** | YDlidar X4 | 128 000 baud, full-duplex; primary support |
+| **Lidar scanner (alt)** | YDlidar X2 | 115 200 baud; TX pin not required |
+| **Motor driver** | TB6612FNG or DRV8833 | Dual H-bridge; shield also works with Due |
+| **DC-DC converter** | LM2596 module | Steps battery voltage down to 5 V for lidar |
+| **Motors** | 2× geared DC motors with wheels | N20-style recommended |
+| **Battery** | 7.4 V LiPo (2S) or equivalent | |
+| **Frame** | Printed from `CAO/chassis.stl` | PLA, 0.2 mm layers |
+| **Skids** | Printed from `CAO/patin.stl` | PLA, 0.2 mm layers |
+
+> **Note (lidar baud rates) :** The X4 uses a non-standard 128 000 bps rate incompatible with Arduino Uno. The X2 runs at standard 115 200 bps but generates continuous data — increase the Arduino Due serial buffer to 512 bytes: edit `%LOCALAPPDATA%\Arduino15\packages\arduino\hardware\sam\1.6.12\cores\arduino\RingBuffer.h` and change `#define SERIAL_BUFFER_SIZE` from 64 to 512 (see [docs/HARDWARE.md](docs/HARDWARE.md) for full path details).
+
+---
+
+## How It Works
+
+```
+ ┌──────────────────────────────────────────────────────────────┐
+ │                    SENSOR LAYER                              │
+ │  5 lidar distances at: −90° | −45° | 0° | +45° | +90°       │
+ │  Normalised to [0, 1] (0 = wall, 1 = max range 2 m)         │
+ └──────────────────┬───────────────────────────────────────────┘
+                    │  5 inputs
+ ┌──────────────────▼───────────────────────────────────────────┐
+ │            HIDDEN LAYER 1 (8 neurons, simulation)            │
+ │         or HIDDEN LAYER   (5 neurons, firmware)              │
+ │  Weighted sum + sigmoid activation                           │
+ └──────────────────┬───────────────────────────────────────────┘
+                    │
+ ┌──────────────────▼───────────────────────────────────────────┐
+ │            HIDDEN LAYER 2 (8 neurons, simulation only)       │
+ │  Weighted sum + sigmoid activation                           │
+ └──────────────────┬───────────────────────────────────────────┘
+                    │
+ ┌──────────────────▼───────────────────────────────────────────┐
+ │                   OUTPUT LAYER (2 neurons)                   │
+ │  output[0] → steering  (0=full left, 0.5=straight, 1=right)  │
+ │  output[1] → throttle  (0=stop, 1=max speed)                 │
+ └──────────────────┬───────────────────────────────────────────┘
+                    │
+ ┌──────────────────▼───────────────────────────────────────────┐
+ │                   MOTOR COMMANDS                             │
+ │  Left motor PWM / Right motor PWM → TB6612 / DRV8833         │
+ └──────────────────────────────────────────────────────────────┘
+```
+
+The three learning modes all converge to the same goal — a network that maps sensor distances to motor commands — but use entirely different training strategies:
+
+- **Genetic Algorithm**: fitness = total distance driven without collision; genes = all synaptic weights.
+- **Supervised Learning**: a scripted teacher generates labelled examples; student trained by linear regression on sensor→action pairs.
+- **Backpropagation**: a heuristic generates target actions each frame; network trained online with gradient descent.
+
+> **Architecture note:** The browser simulation uses a `[5, 8, 8, 2]` network (deeper, for richer training). The firmware uses a `[5, 5, 2]` network (shallower, to fit microcontroller memory). Use `tools/model_converter.js` to bridge the gap — see [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) | Step-by-step guide: simulation, training, export, deploy |
+| [docs/HARDWARE.md](docs/HARDWARE.md) | Bill of materials, wiring, 3D printing, assembly |
+| [docs/NEURAL_NETWORK.md](docs/NEURAL_NETWORK.md) | Technical deep-dive: architectures, equations, tuning tips |
+| [docs/API.md](docs/API.md) | Full JavaScript API reference for all classes |
+| [models/README.md](models/README.md) | Model file format and save/load/convert instructions |
+
+---
+
+## License
+
+This project is licensed under **Creative Commons Attribution-NonCommercial-ShareAlike (CC BY-NC-SA)**.  
+You are free to share and adapt the material for non-commercial purposes, provided you give appropriate credit and distribute your contributions under the same license.
+
+See [LICENSE.txt](LICENSE.txt) for the full text.
+
+---
+
+## Credits
+
+This project is a refactoring and extension of the original **Cortex** project created by **Sylvain Grimal** (GSDevelop-04), published under CC BY-NC-SA, 2019–2020.
+
+Original repository: [github.com/GSDevelop-04/Cortex](https://github.com/GSDevelop-04/Cortex)
+
+The original JavaScript simulations are preserved unchanged in the `JavaScript/` directory and the original Arduino firmware in the `Arduino/` directory.
+
+[![Vidéo de présentation](Images/presentation.jpg)](https://youtu.be/U6bnyhtQa3g)
 
 
 
