@@ -88,6 +88,15 @@
 // Number of lidar scan angles sampled by the neural network
 #define SENSOR_COUNT 5
 
+// Timeout (ms) to wait for USB CDC enumeration on native-USB boards
+// (Arduino Due in native-USB mode, ESP32 with USB CDC enabled).
+// The sketch continues after this delay even if no host has connected.
+#define SERIAL_TIMEOUT_MS 2000
+
+// Angular tolerance (degrees) for matching a full-360 scan angle to one of the
+// 5 desired sensor directions. Increase if a sensor angle is never populated.
+#define LIDAR_ANGLE_TOLERANCE 5.0f
+
 // The five lidar angles (degrees) sampled from the full 360° scan.
 // Index:  0     1     2    3    4
 // Angle: -90°  -45°   0°  45°  90°

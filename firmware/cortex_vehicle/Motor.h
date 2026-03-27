@@ -33,6 +33,16 @@
 #define LEDC_BITS     8      // 8-bit resolution → 0–255
 
 static inline void _ledcSetup4(int pinA1, int pinA2, int pinB1, int pinB2) {
+#if defined(VARIADIRPWM)
+    // In DIR+PWM mode, A1/B1 are direction pins (digital only) — do NOT attach
+    // them to LEDC channels, or digitalWrite will not work on them.
+    ledcSetup(LEDC_CHAN_A2, LEDC_FREQ, LEDC_BITS);
+    ledcSetup(LEDC_CHAN_B2, LEDC_FREQ, LEDC_BITS);
+    ledcAttachPin(pinA2, LEDC_CHAN_A2);
+    ledcAttachPin(pinB2, LEDC_CHAN_B2);
+    pinMode(pinA1, OUTPUT);
+    pinMode(pinB1, OUTPUT);
+#else
     ledcSetup(LEDC_CHAN_A1, LEDC_FREQ, LEDC_BITS);
     ledcSetup(LEDC_CHAN_A2, LEDC_FREQ, LEDC_BITS);
     ledcSetup(LEDC_CHAN_B1, LEDC_FREQ, LEDC_BITS);
@@ -41,6 +51,7 @@ static inline void _ledcSetup4(int pinA1, int pinA2, int pinB1, int pinB2) {
     ledcAttachPin(pinA2, LEDC_CHAN_A2);
     ledcAttachPin(pinB1, LEDC_CHAN_B1);
     ledcAttachPin(pinB2, LEDC_CHAN_B2);
+#endif
 }
 
 // Write a duty cycle (0–255) to a pin via its ledc channel.
@@ -171,11 +182,11 @@ private:
         duty = constrain(duty, 0, MOTOR_MAX_SPEED);
 
 #if defined(VARIADIRPWM)
-        // pinA1 = direction, pinA2 = PWM speed
+        // pinA1 = direction (digital only), pinA2 = PWM speed
+        // On ESP32 the direction pin must NOT be ledc-attached; use digitalWrite.
   #if defined(ESP32)
-        _pwmWrite(LEDC_CHAN_A2, duty);
-        ledcWrite(LEDC_CHAN_A1, 0); // direction via GPIO would normally use digitalWrite
         digitalWrite(_pinA1, norm >= 0 ? HIGH : LOW);
+        _pwmWrite(LEDC_CHAN_A2, duty);
   #else
         digitalWrite(_pinA1, norm >= 0 ? HIGH : LOW);
         analogWrite(_pinA2, duty);

@@ -11,11 +11,19 @@
 //
 // If no output path is supplied the header is written to stdout.
 //
-// Expected JSON structure (matches NeuralNetwork.js save format):
+// Expected JSON structure (matches NeuralNetwork.js save() format):
 // {
-//   "layers": [
-//     { "weights": [[...]], "biases": [...] },   // input  → hidden
-//     { "weights": [[...]], "biases": [...] }    // hidden → output
+//   "layerSizes":   [5, 5, 2],
+//   "learningRate": 0.1,
+//   "activation":   "sigmoid",
+//   "l2Lambda":     0,
+//   "weights": [
+//     { "rows": 5, "cols": 5, "data": [[...], ...] },  // input  → hidden
+//     { "rows": 2, "cols": 5, "data": [[...], ...] }   // hidden → output
+//   ],
+//   "biases": [
+//     { "rows": 5, "cols": 1, "data": [[...]] },       // hidden biases
+//     { "rows": 2, "cols": 1, "data": [[...]] }        // output biases
 //   ],
 //   "fitness":    <number>,   // optional — best fitness score during training
 //   "generation": <number>,   // optional — generation when exported
@@ -79,56 +87,45 @@ function validateModel(model) {
         die('JSON root must be an object.');
     }
 
-    if (!Array.isArray(model.layers)) {
-        die('Missing "layers" array in model JSON.');
+    if (!Array.isArray(model.layerSizes)) {
+        die('Missing "layerSizes" array in model JSON.');
     }
 
-    if (model.layers.length !== 2) {
-        die(`Expected exactly 2 layers (input→hidden, hidden→output), ` +
-            `but found ${model.layers.length}.`);
+    if (model.layerSizes.length < 2) {
+        die(`Expected at least 2 layer sizes, found ${model.layerSizes.length}.`);
     }
 
-    // Layer 0: input → hidden  (expected 5 hidden neurons, 5 inputs each)
-    validateLayer(model.layers[0], 'layers[0] (input→hidden)', 5, 5);
-
-    // Layer 1: hidden → output (expected 2 output neurons, 5 inputs each)
-    validateLayer(model.layers[1], 'layers[1] (hidden→output)', 2, 5);
-}
-
-function validateLayer(layer, name, expectedNeurons, expectedInputs) {
-    if (!layer || typeof layer !== 'object') {
-        die(`${name} must be an object.`);
+    if (!Array.isArray(model.weights)) {
+        die('Missing "weights" array in model JSON.');
     }
 
-    if (!Array.isArray(layer.weights)) {
-        die(`${name}: missing "weights" array.`);
-    }
-    if (!Array.isArray(layer.biases)) {
-        die(`${name}: missing "biases" array.`);
+    if (!Array.isArray(model.biases)) {
+        die('Missing "biases" array in model JSON.');
     }
 
-    if (layer.weights.length !== expectedNeurons) {
-        die(`${name}: expected ${expectedNeurons} weight rows, ` +
-            `found ${layer.weights.length}.`);
-    }
-    if (layer.biases.length !== expectedNeurons) {
-        die(`${name}: expected ${expectedNeurons} biases, ` +
-            `found ${layer.biases.length}.`);
+    const numLayers = model.layerSizes.length - 1;
+    if (model.weights.length !== numLayers) {
+        die(`Expected ${numLayers} weight matrices, found ${model.weights.length}.`);
     }
 
-    for (let i = 0; i < layer.weights.length; i++) {
-        const row = layer.weights[i];
-        if (!Array.isArray(row) || row.length !== expectedInputs) {
-            die(`${name}: weights[${i}] should have ${expectedInputs} values, ` +
-                `found ${Array.isArray(row) ? row.length : typeof row}.`);
+    for (let i = 0; i < numLayers; i++) {
+        const wm = model.weights[i];
+        const bm = model.biases[i];
+        const outSize = model.layerSizes[i + 1];
+        const inSize  = model.layerSizes[i];
+
+        if (!wm || !Array.isArray(wm.data)) {
+            die(`weights[${i}]: missing "data" array.`);
         }
-        for (let j = 0; j < row.length; j++) {
-            if (typeof row[j] !== 'number' || !isFinite(row[j])) {
-                die(`${name}: weights[${i}][${j}] is not a finite number.`);
-            }
+        if (wm.rows !== outSize || wm.cols !== inSize) {
+            die(`weights[${i}]: expected ${outSize}×${inSize}, got ${wm.rows}×${wm.cols}.`);
         }
-        if (typeof layer.biases[i] !== 'number' || !isFinite(layer.biases[i])) {
-            die(`${name}: biases[${i}] is not a finite number.`);
+
+        if (!bm || !Array.isArray(bm.data)) {
+            die(`biases[${i}]: missing "data" array.`);
+        }
+        if (bm.rows !== outSize) {
+            die(`biases[${i}]: expected ${outSize} rows, got ${bm.rows}.`);
         }
     }
 }
@@ -138,17 +135,13 @@ function validateLayer(layer, name, expectedNeurons, expectedInputs) {
 // =============================================================================
 
 function generateHeader(model, sourcePath) {
-    const now       = new Date().toISOString();
-    const fitness   = model.fitness   !== undefined ? String(model.fitness)   : 'N/A';
+    const now        = new Date().toISOString();
+    const fitness    = model.fitness    !== undefined ? String(model.fitness)    : 'N/A';
     const generation = model.generation !== undefined ? String(model.generation) : 'N/A';
-    const trainDate = model.date      !== undefined ? String(model.date)      : 'N/A';
+    const trainDate  = model.date       !== undefined ? String(model.date)       : 'N/A';
 
-    const layer0 = model.layers[0];  // input → hidden
-    const layer1 = model.layers[1];  // hidden → output
-
-    const hiddenCount = layer0.weights.length;   // 5
-    const inputCount  = layer0.weights[0].length; // 5
-    const outputCount = layer1.weights.length;   // 2
+    const layerSizes = model.layerSizes;
+    const numLayers  = layerSizes.length - 1;
 
     const lines = [];
 
@@ -158,11 +151,12 @@ function generateHeader(model, sourcePath) {
     lines.push('// Auto-generated by Cortex model_converter.js');
     lines.push('// DO NOT EDIT BY HAND — regenerate from model_converter.js');
     lines.push('//');
-    lines.push(`// Source file : ${path.basename(sourcePath)}`);
-    lines.push(`// Converted   : ${now}`);
-    lines.push(`// Training date : ${trainDate}`);
-    lines.push(`// Generation    : ${generation}`);
-    lines.push(`// Best fitness  : ${fitness}`);
+    lines.push(`// Source file    : ${path.basename(sourcePath)}`);
+    lines.push(`// Converted      : ${now}`);
+    lines.push(`// Training date  : ${trainDate}`);
+    lines.push(`// Generation     : ${generation}`);
+    lines.push(`// Best fitness   : ${fitness}`);
+    lines.push(`// Architecture   : [${layerSizes.join(', ')}]`);
     lines.push('');
     lines.push('#pragma once');
     lines.push('');
@@ -171,52 +165,38 @@ function generateHeader(model, sourcePath) {
     // Architecture constants
     // -------------------------------------------------------------------------
     lines.push('// Network architecture');
-    lines.push(`#define NN_INPUT_SIZE   ${inputCount}`);
-    lines.push(`#define NN_HIDDEN_SIZE  ${hiddenCount}`);
-    lines.push(`#define NN_OUTPUT_SIZE  ${outputCount}`);
-    lines.push('');
-
-    // -------------------------------------------------------------------------
-    // W1 — input → hidden  [hidden][input]
-    // -------------------------------------------------------------------------
-    lines.push(`// Input → Hidden weights  [${hiddenCount}][${inputCount}]`);
-    lines.push(`const float NN_WEIGHTS_1[${hiddenCount}][${inputCount}] = {`);
-    for (let h = 0; h < hiddenCount; h++) {
-        const vals = layer0.weights[h].map(v => formatFloat(v));
-        const comma = h < hiddenCount - 1 ? ',' : '';
-        lines.push(`    { ${vals.join(', ')} }${comma}`);
+    for (let i = 0; i < layerSizes.length; i++) {
+        const label = i === 0 ? 'INPUT' : (i === layerSizes.length - 1 ? 'OUTPUT' : `HIDDEN${i}`);
+        lines.push(`#define NN_${label}_SIZE  ${layerSizes[i]}`);
     }
-    lines.push('};');
+    lines.push(`#define NN_NUM_LAYERS   ${numLayers}`);
     lines.push('');
 
     // -------------------------------------------------------------------------
-    // B1 — hidden biases  [hidden]
+    // Weight matrices and bias vectors
     // -------------------------------------------------------------------------
-    lines.push(`// Hidden layer biases  [${hiddenCount}]`);
-    const b1 = layer0.biases.map(v => formatFloat(v));
-    lines.push(`const float NN_BIAS_1[${hiddenCount}] = { ${b1.join(', ')} };`);
-    lines.push('');
+    for (let i = 0; i < numLayers; i++) {
+        const wm  = model.weights[i];  // { rows, cols, data }
+        const bm  = model.biases[i];   // { rows, cols, data }
+        const idx = i + 1;
+        const outSize = wm.rows;
+        const inSize  = wm.cols;
 
-    // -------------------------------------------------------------------------
-    // W2 — hidden → output  [output][hidden]
-    // -------------------------------------------------------------------------
-    lines.push(`// Hidden → Output weights  [${outputCount}][${hiddenCount}]`);
-    lines.push(`const float NN_WEIGHTS_2[${outputCount}][${hiddenCount}] = {`);
-    for (let o = 0; o < outputCount; o++) {
-        const vals = layer1.weights[o].map(v => formatFloat(v));
-        const comma = o < outputCount - 1 ? ',' : '';
-        lines.push(`    { ${vals.join(', ')} }${comma}`);
+        lines.push(`// Layer ${idx} weights  [${outSize}][${inSize}]`);
+        lines.push(`const float NN_WEIGHTS_${idx}[${outSize}][${inSize}] = {`);
+        for (let r = 0; r < outSize; r++) {
+            const vals  = wm.data[r].map(v => formatFloat(v));
+            const comma = r < outSize - 1 ? ',' : '';
+            lines.push(`    { ${vals.join(', ')} }${comma}`);
+        }
+        lines.push('};');
+        lines.push('');
+
+        lines.push(`// Layer ${idx} biases  [${outSize}]`);
+        const biasVals = bm.data.map(row => formatFloat(row[0]));
+        lines.push(`const float NN_BIAS_${idx}[${outSize}] = { ${biasVals.join(', ')} };`);
+        lines.push('');
     }
-    lines.push('};');
-    lines.push('');
-
-    // -------------------------------------------------------------------------
-    // B2 — output biases  [output]
-    // -------------------------------------------------------------------------
-    lines.push(`// Output layer biases  [${outputCount}]`);
-    const b2 = layer1.biases.map(v => formatFloat(v));
-    lines.push(`const float NN_BIAS_2[${outputCount}] = { ${b2.join(', ')} };`);
-    lines.push('');
 
     return lines.join('\n') + '\n';
 }
@@ -225,9 +205,13 @@ function generateHeader(model, sourcePath) {
 // Helpers
 // =============================================================================
 
-// Format a float as a C float literal with 6 decimal places and an 'f' suffix.
+// Format a float as a C float literal with 8 decimal places and an 'f' suffix.
+// Using 8 significant digits avoids precision loss for very small weights
+// (e.g., after heavy L2 regularisation) while remaining human-readable.
 function formatFloat(v) {
-    return v.toFixed(6) + 'f';
+    // Use toPrecision(8) to preserve up to 8 significant digits,
+    // then append the C 'f' suffix for single-precision literals.
+    return parseFloat(v.toPrecision(8)).toString() + 'f';
 }
 
 function printUsage() {

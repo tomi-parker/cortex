@@ -58,8 +58,21 @@ void applyNetworkOutputs(float outputs[2]);
 void setup() {
     // --- Debug serial ---------------------------------------------------------
     Serial.begin(115200);
-    while (!Serial && millis() < 2000) { /* wait up to 2000 ms for USB CDC */ }
+    while (!Serial && millis() < SERIAL_TIMEOUT_MS) { /* wait for USB CDC */ }
     Serial.println(F("Cortex AI Ready"));
+
+    // --- Validate neural network weights (warn if all zeros) ------------------
+    {
+        bool allZero = true;
+        for (int i = 0; i < 5 && allZero; i++)
+            for (int j = 0; j < 5 && allZero; j++)
+                if (NN_WEIGHTS_1[i][j] != 0.0f) allZero = false;
+        if (allZero) {
+            Serial.println(F("WARNING: NN weights are all zero (placeholder values)."));
+            Serial.println(F("         Train the model in simulation and run model_converter.js"));
+            Serial.println(F("         to generate real weights before driving autonomously."));
+        }
+    }
 
     // --- Lidar serial ---------------------------------------------------------
 #if defined(ESP32)

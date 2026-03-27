@@ -166,6 +166,9 @@ class Vehicle {
     const output = this.brain.predict(this.sensorReadings);
 
     // output[0] ∈ [0,1] → steering ∈ [−maxSteer, +maxSteer]
+    // NOTE: This mapping assumes sigmoid activation (output range [0,1]).
+    // If the network uses tanh (range [−1,1]), update this line to:
+    //   this.angle += output[0] * this.maxSteer;
     this.angle += (output[0] - 0.5) * 2 * this.maxSteer;
 
     // output[1] ∈ [0,1] → speed

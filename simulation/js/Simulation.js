@@ -161,6 +161,10 @@ class Simulation {
   // ---------------------------------------------------------------------------
 
   _initGenetic() {
+    // NOTE: The simulation uses a larger [5,8,8,2] architecture for richer
+    // training. The firmware only supports the simpler [5,5,2] topology.
+    // After training, run tools/model_converter.js which will automatically
+    // re-map the first and last layer; see docs/NEURAL_NETWORK.md for details.
     const template = new NeuralNetwork([5, 8, 8, 2], {
       activation:   'sigmoid',
       learningRate: 0.1,
