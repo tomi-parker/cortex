@@ -278,7 +278,10 @@ class NeuralNetwork {
    * @param {object} data  Output of save()
    */
   load(data) {
-    if (JSON.stringify(data.layerSizes) !== JSON.stringify(this.layerSizes)) {
+    const sizesMatch =
+      data.layerSizes.length === this.layerSizes.length &&
+      data.layerSizes.every((v, i) => v === this.layerSizes[i]);
+    if (!sizesMatch) {
       throw new Error('NeuralNetwork.load: layerSizes mismatch');
     }
     this.learningRate = data.learningRate;

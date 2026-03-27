@@ -187,10 +187,12 @@ class GeneticAlgorithm {
     while (next.length < population.length) {
       const idxA  = this.selection(fitnessScores);
       let   idxB  = this.selection(fitnessScores);
-      // Avoid self-crossover when population > 1
+      // Avoid self-crossover when population > 1; give up after a few tries
+      // to prevent an infinite loop when all tournament winners are the same agent.
+      const MAX_SELECTION_RETRIES = 10;
       if (population.length > 1) {
         let tries = 0;
-        while (idxB === idxA && tries < 10) {
+        while (idxB === idxA && tries < MAX_SELECTION_RETRIES) {
           idxB = this.selection(fitnessScores);
           tries++;
         }
