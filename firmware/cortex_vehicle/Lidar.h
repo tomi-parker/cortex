@@ -249,8 +249,7 @@ private:
         // Check each target angle; accept if within ±5°.
         for (int i = 0; i < SENSOR_COUNT; i++) {
             float diff = angleDeg - (float)LIDAR_ANGLES[i];
-            if (diff < 0) diff = -diff;
-            if (diff <= 5.0f) {
+            if (fabsf(diff) <= 5.0f) {
                 // Keep the closest (smallest) reading for this slot.
                 if (distMm > 0.0f &&
                     (distances[i] == 0.0f || distMm < distances[i])) {

@@ -58,7 +58,7 @@ void applyNetworkOutputs(float outputs[2]);
 void setup() {
     // --- Debug serial ---------------------------------------------------------
     Serial.begin(115200);
-    while (!Serial && millis() < 2000) { /* wait up to 2 s for USB CDC */ }
+    while (!Serial && millis() < 2000) { /* wait up to 2000 ms for USB CDC */ }
     Serial.println(F("Cortex AI Ready"));
 
     // --- Lidar serial ---------------------------------------------------------

@@ -140,7 +140,7 @@ function validateLayer(layer, name, expectedNeurons, expectedInputs) {
 function generateHeader(model, sourcePath) {
     const now       = new Date().toISOString();
     const fitness   = model.fitness   !== undefined ? String(model.fitness)   : 'N/A';
-    const generation= model.generation!== undefined ? String(model.generation): 'N/A';
+    const generation = model.generation !== undefined ? String(model.generation) : 'N/A';
     const trainDate = model.date      !== undefined ? String(model.date)      : 'N/A';
 
     const layer0 = model.layers[0];  // input → hidden
